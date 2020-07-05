@@ -2,7 +2,6 @@
 
 # ISPConfig 3.1 API
 # User must provide login data and URL to the ISPConfig installation incl. port. The remote user in ISPConfig must have access to:
-# - DNS zone Functions
 # - DNS txt Functions
 
 # Report bugs to https://github.com/sjau/acme.sh
@@ -46,7 +45,7 @@ _ISPC_credentials() {
     _saveaccountconf ISPC_Api "${ISPC_Api}"
     _saveaccountconf ISPC_Api_Insecure "${ISPC_Api_Insecure}"
     # Set whether curl should use secure or insecure mode
-    HTTPS_INSECURE="${ISPC_Api_Insecure}"
+    export HTTPS_INSECURE="${ISPC_Api_Insecure}"
   fi
 }
 
@@ -129,7 +128,7 @@ _ISPC_addTxt() {
   curSerial="$(date +%s)"
   curStamp="$(date +'%F %T')"
   params="\"server_id\":\"${server_id}\",\"zone\":\"${zone}\",\"name\":\"${fulldomain}.\",\"type\":\"txt\",\"data\":\"${txtvalue}\",\"aux\":\"0\",\"ttl\":\"3600\",\"active\":\"y\",\"stamp\":\"${curStamp}\",\"serial\":\"${curSerial}\""
-  curData="{\"session_id\":\"${sessionID}\",\"client_id\":\"${client_id}\",\"params\":{${params}}}"
+  curData="{\"session_id\":\"${sessionID}\",\"client_id\":\"${client_id}\",\"params\":{${params}},\"update_serial\":true}"
   curResult="$(_post "${curData}" "${ISPC_Api}?dns_txt_add")"
   _debug "Calling _ISPC_addTxt: '${curData}' '${ISPC_Api}?dns_txt_add'"
   _debug "Result of _ISPC_addTxt: '$curResult'"
@@ -161,7 +160,7 @@ _ISPC_rmTxt() {
       *)
         unset IFS
         _info "Retrieved Record ID."
-        curData="{\"session_id\":\"${sessionID}\",\"primary_id\":\"${record_id}\"}"
+        curData="{\"session_id\":\"${sessionID}\",\"primary_id\":\"${record_id}\",\"update_serial\":true}"
         curResult="$(_post "${curData}" "${ISPC_Api}?dns_txt_delete")"
         _debug "Calling _ISPC_rmTxt: '${curData}' '${ISPC_Api}?dns_txt_delete'"
         _debug "Result of _ISPC_rmTxt: '$curResult'"
